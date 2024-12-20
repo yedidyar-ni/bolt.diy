@@ -2,7 +2,7 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import { getAPIKey, getBaseURL } from '~/lib/.server/llm/api-key';
+import { getAPIKey, getBaseURL, getAmazonBedrockCredentials } from '~/lib/.server/llm/api-key';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
@@ -12,11 +12,28 @@ import { createMistral } from '@ai-sdk/mistral';
 import { createCohere } from '@ai-sdk/cohere';
 import type { LanguageModelV1 } from 'ai';
 import type { IProviderSetting } from '~/types/model';
+import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
 
 export const DEFAULT_NUM_CTX = process.env.DEFAULT_NUM_CTX ? parseInt(process.env.DEFAULT_NUM_CTX, 10) : 32768;
 
 type OptionalApiKey = string | undefined;
 
+export function getBedrockModel(
+  region: string,
+  accessKeyId: string,
+  secretAccessKey: string,
+  model: string,
+  sessionToken?: string,
+) {
+  const bedrock = createAmazonBedrock({
+    region,
+    accessKeyId,
+    secretAccessKey,
+    sessionToken,
+  });
+
+  return bedrock(model);
+}
 export function getAnthropicModel(apiKey: OptionalApiKey, model: string) {
   const anthropic = createAnthropic({
     apiKey,
@@ -152,6 +169,7 @@ export function getModel(
 
   const apiKey = getAPIKey(serverEnv, provider, apiKeys); // Then assign
   const baseURL = getBaseURL(serverEnv, provider, providerSettings);
+  const amazonBedrockCredentials = getAmazonBedrockCredentials(serverEnv);
 
   // console.log({apiKey,baseURL});
 
@@ -184,6 +202,14 @@ export function getModel(
       return getCohereAIModel(apiKey, model);
     case 'Perplexity':
       return getPerplexityModel(apiKey, model);
+    case 'AmazonBedrock':
+      return getBedrockModel(
+        amazonBedrockCredentials.region,
+        amazonBedrockCredentials.accessKeyId,
+        amazonBedrockCredentials.secretAccessKey,
+        model,
+        amazonBedrockCredentials.sessionToken,
+      );
     default:
       return getOllamaModel(baseURL, model);
   }

@@ -2,6 +2,22 @@ import { env } from 'node:process';
 import type { IProviderSetting } from '~/types/model';
 import { getProviderBaseUrlAndKey } from '~/utils/constants';
 
+interface AmazonBedrockCredentials {
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+}
+
+export function getAmazonBedrockCredentials(cloudflareEnv: Env): AmazonBedrockCredentials {
+  return {
+    region: env.AMAZON_BEDROCK_REGION || cloudflareEnv.AMAZON_BEDROCK_REGION,
+    accessKeyId: env.AMAZON_BEDROCK_ACCESS_KEY_ID || cloudflareEnv.AMAZON_BEDROCK_ACCESS_KEY_ID,
+    secretAccessKey: env.AMAZON_BEDROCK_SECRET_ACCESS_KEY || cloudflareEnv.AMAZON_BEDROCK_SECRET_ACCESS_KEY,
+    sessionToken: env.AMAZON_BEDROCK_SESSION_TOKEN || cloudflareEnv.AMAZON_BEDROCK_SESSION_TOKEN,
+  };
+}
+
 export function getAPIKey(cloudflareEnv: Env, provider: string, userApiKeys?: Record<string, string>) {
   /**
    * The `cloudflareEnv` is only used when deployed or when previewing locally.
