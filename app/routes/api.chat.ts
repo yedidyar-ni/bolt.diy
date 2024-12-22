@@ -116,7 +116,13 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       promptId,
     });
 
-    stream.switchSource(result.toDataStream());
+    stream.switchSource(
+      result.toDataStream({
+        getErrorMessage(error) {
+          return `Custom error: ${error}`;
+        },
+      }),
+    );
 
     return new Response(stream.readable, {
       status: 200,

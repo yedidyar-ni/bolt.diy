@@ -15,4 +15,8 @@ interface Env {
   MISTRAL_API_KEY: string;
   XAI_API_KEY: string;
   PERPLEXITY_API_KEY: string;
+  AMAZON_BEDROCK_REGION: string;
+  AMAZON_BEDROCK_ACCESS_KEY_ID: string;
+  AMAZON_BEDROCK_SECRET_ACCESS_KEY: string;
+  AMAZON_BEDROCK_SESSION_TOKEN?: string;
 }
